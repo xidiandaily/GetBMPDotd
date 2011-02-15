@@ -184,6 +184,28 @@ HCURSOR CGetBMPDotDlg::OnQueryDragIcon()
     return (HCURSOR) m_hIcon;
 }
 
+int btoi(char* binary_c)
+{
+    int blength = strlen(binary_c);//计算二进制字符串的长度
+    int i = 0;
+    int decimal = 0;
+
+    for(i = 0; i < blength; i++)
+    {
+        int number = binary_c[i] - '0';
+        if(number == 0 || number == 1)//判断所输入的数字是否为二进制数字
+        {
+            //这里使用移位方法。在数字a向左移一位，然后再在最后一位添加一个数字b，那么新数字的十进制值为a*2 + b
+            decimal = decimal * 2 + number;
+        }
+        else
+        {
+            //MessageBox(hwnd, "请输入二进制整数", "错误", MB_OK);
+            break;
+        }
+    }
+    return decimal;
+}
 void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
 {
     if (!m_dib.Load(strPathFileName))
@@ -233,7 +255,7 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
     m_dib.SetPalette(&dc);
     m_dib.Draw(&dc,m_PicWidth,m_PicHeigh,bm.bmWidth,bm.bmHeight);
     m_strEDITBit += strPathFileName;
-    m_strEDITBit += "\r\n";
+    m_strEDITBit += "\r\n点阵表:\r\n";
 
     m_PicWidth += (width + 10);
     if (m_PicWidth >= 490)
@@ -242,13 +264,13 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
         m_PicHeigh += 20;
     }
 
-/*
-    if (!((width == 11 && height == 12) || (width == 42 && height == 14)))
-    {
-        MessageBox("读取图片大小必须为 12*36 或 14*42!");
-        return;
-    }
-*/
+    /*
+        if (!((width == 11 && height == 12) || (width == 42 && height == 14)))
+        {
+            MessageBox("读取图片大小必须为 12*36 或 14*42!");
+            return;
+        }
+    */
 
     for(m=0; m<height; m++)//    列扫描
     {
@@ -277,8 +299,8 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
         m_strEDITBit +="\r\n";
     }
 
-    m_strEDITBit +="\r\n";
-    m_strEDITBit +="\r\n";
+    m_strEDITBit +="转换后得到的参数:\r\n";
+//    m_strEDITBit +="\r\n";
     //8位转一字节
     unsigned char tc[8];//临时存一个字节数据
     int s = 0;
@@ -305,11 +327,11 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
     m_ByteData[p++] = width;
 
 
-    str.Format("%d ",m_ByteData[0]);	//高
+    str.Format("高:%d ",m_ByteData[0]);	//高
     m_strEDITBit += str;
     ByteCount ++;
 
-    str.Format("%d ",m_ByteData[1]);	//宽
+    str.Format("宽:%d ",m_ByteData[1]);	//宽
     m_strEDITBit += str;
     ByteCount ++;
 
@@ -318,74 +340,101 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
 
     m_strEDITBit +="\r\n";
 
-    while (i<8)
+    if(width == 11 && height == 12)
     {
-        tc[i] = m_BinData[m+q][n];
-        m++;
-        i++;
-        if (i == 8)
+        //FONT12
+        int hang,lie;
+
+        for(hang=0; hang<2; hang++)
         {
-            n ++;
-            s = 0;
-            k = 7;
-            for (j=7; j>=0; j--)
+            for(lie=0; lie<5; lie++)
             {
-                s = s + tc[j] * (int)pow(2, k);//八个二进制位转为十进制 字节
-                k -- ;
-            }
+                int bit_index=8*hang;
+                char temp[10]={0};
 
-            m_ByteData[p++] = s;
-            str.Format("0x%02X ",s);
-            m_strEDITBit += str;
-            ByteCount ++;                       //字节数
-            if(n >= width)						//自上而下的列前八位扫完
-            {
-                n = 0;
-                q+=8;                           //从第八行第0列开始
-                BeiBa = height / 8;         //有多个个整 8 行
-                YuBa =  height % 8;
-
-                if (YuBa && (q / 8 == BeiBa))                // 最后不足8倍行的行数
+                CString strBit="";
+                CString strInt="";
+                strBit.Format("列%d:",lie%2);
+                for(bit_index; bit_index<8*hang+8; bit_index++)
                 {
-                    if (((q+8) * width) > (height * width))
+                    strBit += m_BinData[bit_index][lie]?"1" : "0";
+                    temp[bit_index%8] = m_BinData[bit_index][lie]?'1' : '0';
+                }
+                strInt.Format(":%d",btoi(temp));
+                m_strEDITBit += strBit+strInt+"\r\n";
+            }
+        }
+
+    }
+    /*
+        while (i<8)
+        {
+            tc[i] = m_BinData[m+q][n];
+            m++;
+            i++;
+            if (i == 8)
+            {
+                n ++;
+                s = 0;
+                k = 7;
+                for (j=7; j>=0; j--)
+                {
+                    s = s + tc[j] * (int)pow(2, k);//八个二进制位转为十进制 字节
+                    k -- ;
+                }
+
+                m_ByteData[p++] = s;
+                str.Format("0x%02X ",s);
+                m_strEDITBit += str;
+                ByteCount ++;                       //字节数
+                if(n >= width)						//自上而下的列前八位扫完
+                {
+                    n = 0;
+                    q+=8;                           //从第八行第0列开始
+                    BeiBa = height / 8;         //有多个个整 8 行
+                    YuBa =  height % 8;
+
+                    if (YuBa && (q / 8 == BeiBa))                // 最后不足8倍行的行数
                     {
-                        for (i=0; i<(8-YuBa); i++)				  //最后 8-YuBa 行 x 列  补零
+                        if (((q+8) * width) > (height * width))
                         {
-                            for (j=0; j<width; j++)
+                            for (i=0; i<(8-YuBa); i++)				  //最后 8-YuBa 行 x 列  补零
                             {
-                                m_BinData[height+i][j] = 0;
+                                for (j=0; j<width; j++)
+                                {
+                                    m_BinData[height+i][j] = 0;
+                                }
                             }
                         }
                     }
-                }
-                if (!YuBa)
-                {
-                    if ((q / 8) == BeiBa)           //全部扫描完成
+                    if (!YuBa)
                     {
-                        break;
+                        if ((q / 8) == BeiBa)           //全部扫描完成
+                        {
+                            break;
+                        }
+                    }
+                    else								//有多于8的整数倍时 全部扫描完成
+                    {
+                        if ((q / 8) == (BeiBa+1))
+                        {
+                            break;
+                        }
                     }
                 }
-                else								//有多于8的整数倍时 全部扫描完成
+                i = 0;
+                m = 0;
+                if (!((ByteCount-3) % 12))
                 {
-                    if ((q / 8) == (BeiBa+1))
-                    {
-                        break;
-                    }
+                    m_strEDITBit +="\r\n";
                 }
-            }
-            i = 0;
-            m = 0;
-            if (!((ByteCount-3) % 12))
-            {
-                m_strEDITBit +="\r\n";
             }
         }
-    }
-
+    */
     m_strEDITBit +="\r\n";
-    str.Format("总字节数：%d  (包括宽 高 点阵数据长度)",ByteCount);   //宽 高 点阵数据长度 点阵数据
-    m_strEDITBit += str;
-    m_strEDITBit +="\r\n";
+//    str.Format("总字节数：%d  (包括宽 高 点阵数据长度)",ByteCount);   //宽 高 点阵数据长度 点阵数据
+//    m_strEDITBit += str;
+//    m_strEDITBit +="\r\n";
 
 
     m_ByteData[2] = ByteCount - 3;    //点阵长度不包括 高 宽  点阵长度
