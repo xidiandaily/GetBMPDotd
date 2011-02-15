@@ -347,21 +347,30 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
 
         for(hang=0; hang<2; hang++)
         {
-            for(lie=0; lie<5; lie++)
+            for(lie=0; lie<12; lie++)
             {
-                int bit_index=8*hang;
+                int bit_index=8*hang +7;
+                int count=0;
                 char temp[10]={0};
 
                 CString strBit="";
                 CString strInt="";
                 strBit.Format("ап%d:",lie%2);
-                for(bit_index; bit_index<8*hang+8; bit_index++)
+                for(bit_index; bit_index>=8*hang; bit_index--)
                 {
-                    strBit += m_BinData[bit_index][lie]?"1" : "0";
-                    temp[bit_index%8] = m_BinData[bit_index][lie]?'1' : '0';
+                    strBit += m_BinData[bit_index][lie]==1 ?"1" : "0";
+                    temp[count] = m_BinData[bit_index][lie]==1 ?'1' : '0';
+                    count++;
                 }
                 strInt.Format(":%d",btoi(temp));
-                m_strEDITBit += strBit+strInt+"\r\n";
+                if(lie==11)
+                {
+                    m_strEDITBit += strBit+strInt+"//\r\n";
+                }
+                else
+                {
+                    m_strEDITBit += strBit+strInt+"\r\n";
+                }
             }
         }
 
