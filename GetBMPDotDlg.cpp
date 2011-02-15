@@ -232,6 +232,7 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
     CClientDC dc(this);
     m_dib.SetPalette(&dc);
     m_dib.Draw(&dc,m_PicWidth,m_PicHeigh,bm.bmWidth,bm.bmHeight);
+    m_strEDITBit += strPathFileName;
     m_strEDITBit += "\r\n";
 
     m_PicWidth += (width + 10);
