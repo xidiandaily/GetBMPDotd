@@ -340,14 +340,16 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
 
     m_strEDITBit +="\r\n";
 
-    if(width == 11 && height == 12)
+    if(1/*height == 12*/)
     {
         //FONT12
         int hang,lie;
+        int liemax = width%2==0?width:width+1;
+        int hangmax = height%8==0?(height/8):(height/8 +1);
 
-        for(hang=0; hang<2; hang++)
+        for(hang=0; hang<hangmax; hang++)
         {
-            for(lie=0; lie<12; lie++)
+            for(lie=0; lie<liemax; lie++)
             {
                 int bit_index=8*hang +7;
                 int count=0;
