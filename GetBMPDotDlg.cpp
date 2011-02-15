@@ -241,13 +241,13 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
         m_PicHeigh += 20;
     }
 
-
-    if (!((width == 36 && height == 12) || (width == 42 && height == 14)))
+/*
+    if (!((width == 11 && height == 12) || (width == 42 && height == 14)))
     {
         MessageBox("读取图片大小必须为 12*36 或 14*42!");
         return;
     }
-
+*/
 
     for(m=0; m<height; m++)//    列扫描
     {
