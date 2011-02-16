@@ -14,6 +14,29 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+FIND_VALUE_T get_unicode[] =
+{
+    {".",46},
+    {"0",48},
+    {"1",49},
+    {"2",50},
+    {"3",51},
+    {"4",52},
+    {"5",53},
+    {"6",54},
+    {"7",55},
+    {"8",56},
+    {"9",57},
+    {"P",80},
+    {"p",112},
+    {"#",35},
+    {"+",43},
+    {"冒号",58},
+    {"星号",42},
+    {"point",46}
+};
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDlg dialog used for App About
 
@@ -311,6 +334,8 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
     int q = 0;
     int ByteCount = 0;//点阵字节长度
     CString str;
+    CString strxml="";
+    strxml.Format("<glyph unicode=\"%d\" width=\"%d\">",unicode,width);
 
     int BeiBa = 0;         //有多少个整 8 行
     int YuBa =  0;
@@ -340,7 +365,7 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
 
     m_strEDITBit +="\r\n";
 
-    if(1/*height == 12*/)
+    if(height == 7)
     {
         //FONT12
         int hang,lie;
@@ -357,6 +382,91 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
 
                 CString strBit="";
                 CString strInt="";
+                CString xml="";
+                strBit.Format("列%d:",lie%2);
+                for(bit_index; bit_index>=8*hang; bit_index--)
+                {
+                    strBit += m_BinData[bit_index][lie]==1 ?"1" : "0";
+                    temp[count] = m_BinData[bit_index][lie]==1 ?'1' : '0';
+                    count++;
+                }
+                strInt.Format(":%d",btoi(temp));
+                if(lie==11)
+                {
+                    m_strEDITBit += strBit+strInt+"//\r\n";
+                    xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",lie,hang,btoi(temp));
+                }
+                else
+                {
+                    m_strEDITBit += strBit+strInt+"\r\n";
+                    xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",lie,hang,btoi(temp));
+                }
+                strxml += xml ;
+            }
+        }
+
+    }
+    else if (height==28)
+    {
+        //FONT23
+        int hang,lie;
+        int liemax = width%item_count==0?width:((width/item_count+1)*4);
+        int hangmax = height%8==0?(height/8):(height/8 +1);
+
+        for(hang=0; hang<hangmax; hang++)
+        {
+            for(lie=0; lie<liemax; lie++)
+            {
+                int bit_index=8*hang +7;
+                int count=0;
+                char temp[10]={0};
+                char row=(hang*liemax+lie)/4;
+                char col=lie%item_count;
+
+                CString strBit="";
+                CString strInt="";
+                CString xml="为转换";
+                strBit.Format("列%d:",lie%2);
+                for(bit_index; bit_index>=8*hang; bit_index--)
+                {
+                    strBit += m_BinData[bit_index][lie]==1 ?"1" : "0";
+                    temp[count] = m_BinData[bit_index][lie]==1 ?'1' : '0';
+                    count++;
+                }
+                strInt.Format(":%d",btoi(temp));
+                if(lie==liemax-1)
+                {
+//                    m_strEDITBit += strBit+strInt+"//\r\n";
+                    xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",row,col,btoi(temp));
+                }
+                else
+                {
+//                    m_strEDITBit += strBit+strInt+"\r\n";
+                    xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",row,col,btoi(temp));
+                }
+                strxml += xml ;
+            }
+        }
+
+    }
+    else
+    {
+        //FONT23
+        int hang,lie;
+        int liemax = width%2==0?width:width+1;
+        int hangmax = height%8==0?(height/8):(height/8 +1);
+
+        for(hang=0; hang<hangmax; hang++)
+        {
+            for(lie=0; lie<liemax; lie++)
+            {
+                int bit_index=8*hang +7;
+                int count=0;
+                char temp[10]={0};
+
+                CString strBit="";
+                CString strInt="";
+                CString xml="为转换";
                 strBit.Format("列%d:",lie%2);
                 for(bit_index; bit_index>=8*hang; bit_index--)
                 {
@@ -373,10 +483,12 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
                 {
                     m_strEDITBit += strBit+strInt+"\r\n";
                 }
+                strxml += xml ;
             }
         }
 
     }
+
     /*
         while (i<8)
         {
@@ -443,6 +555,7 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
         }
     */
     m_strEDITBit +="\r\n";
+    m_strEDITBit +=strxml + "</glyph>" + "\r\n";
 //    str.Format("总字节数：%d  (包括宽 高 点阵数据长度)",ByteCount);   //宽 高 点阵数据长度 点阵数据
 //    m_strEDITBit += str;
 //    m_strEDITBit +="\r\n";
@@ -485,6 +598,7 @@ void CGetBMPDotDlg::OnBTNReadConfig()
     m_PicWidth = 20;
     m_WriteByteCount = 0;
     m_WriteIndex = 0;
+    item_count = 4;
 
 
     CFileDialog dlg(TRUE,NULL,"*.ini",
@@ -510,9 +624,22 @@ void CGetBMPDotDlg::OnBTNReadConfig()
         m_strPath =  strPathName;
         for (i=0; i<Count; i++)
         {
+            int pos;
+            int listIndex=0;
+            CString unicodeStr;
             str.Format("%d",i);
             strFileName = IniFile.GetString("PATHNAME", str);		//读取文件名
             strPathFileName = strPathName + strFileName;
+            pos=strFileName.Find('.');
+            unicodeStr=strFileName.Left(pos);
+            for(listIndex=0;listIndex<sizeof(get_unicode)/sizeof(FIND_VALUE_T);listIndex++)
+            {
+                if(0==unicodeStr.Compare(get_unicode[listIndex].str))
+                {
+                    unicode = get_unicode[listIndex].value;
+                    break;
+                }
+            }
             OnBTNReadBMP(strPathFileName, i+1);
         }
     }

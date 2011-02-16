@@ -14,6 +14,8 @@
 #include "Dib.h"
 #include "ini.h"
 
+
+
 class CGetBMPDotDlg : public CDialog
 {
 // Construction
@@ -36,7 +38,7 @@ public:
 	CStatic m_stc;
 	CDib    m_dib;
 	unsigned char	m_BinData[128][128];
-	unsigned char   m_ByteData[256];   
+	unsigned char   m_ByteData[256];
 	unsigned char   m_WriteFileByte[2048];
 	unsigned int    m_WriteDotAddr[56];           //存放各图片点阵的地址  点阵数据索引
 
@@ -46,8 +48,10 @@ public:
 	int     m_WriteIndex;
 	CString  m_strPath;
 	int     m_bmpSum;
-    unsigned char m_LastByteCount; 
+    unsigned char m_LastByteCount;
 	//的汉字  最多三个字 图标固定为 12 * 36 和 14 * 42 两种大小图标
+	int     unicode;        //图像所代表的字的unicode码. by chiyulong 2011-2-16 17:6:22
+    int     item_count;     //每个区间所含的item个数
 
 
     void WriteDotByteFile();
@@ -65,6 +69,12 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+typedef struct
+{
+    LPCTSTR str;
+    int     value;
+}FIND_VALUE_T;
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
