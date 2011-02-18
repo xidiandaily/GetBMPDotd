@@ -90,7 +90,12 @@ CGetBMPDotDlg::CGetBMPDotDlg(CWnd* pParent /*=NULL*/)
 {
     //{{AFX_DATA_INIT(CGetBMPDotDlg)
     m_strEDITBit = _T("");
-    //}}AFX_DATA_INIT
+	m_Radio_size = 0;
+	m_check_martx = FALSE;
+	m_check_param = FALSE;
+	m_check_xml = FALSE;
+	m_check_pic = FALSE;
+	//}}AFX_DATA_INIT
     // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -100,7 +105,12 @@ void CGetBMPDotDlg::DoDataExchange(CDataExchange* pDX)
     CDialog::DoDataExchange(pDX);
     //{{AFX_DATA_MAP(CGetBMPDotDlg)
     DDX_Text(pDX, IDC_EDITBITDot, m_strEDITBit);
-    //}}AFX_DATA_MAP
+	DDX_Radio(pDX, IDC_RADIO_HEIGHT_7, m_Radio_size);
+	DDX_Check(pDX, IDC_CHECK_SHOW_MARTX, m_check_martx);
+	DDX_Check(pDX, IDC_CHECK_SHOW_PARAM, m_check_param);
+	DDX_Check(pDX, IDC_CHECK_SHOW_XML, m_check_xml);
+	DDX_Check(pDX, IDC_CHECK_SHOWPIC, m_check_pic);
+	//}}AFX_DATA_MAP
 }
 
 BEGIN_MESSAGE_MAP(CGetBMPDotDlg, CDialog)
@@ -110,7 +120,10 @@ BEGIN_MESSAGE_MAP(CGetBMPDotDlg, CDialog)
     ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BTNReadBMP, OnBTNReadBMP)
     ON_BN_CLICKED(IDC_BTNReadCon, OnBTNReadConfig)
-    //}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_RADIO_HEIGHT_7, OnRadioHeight7)
+	ON_BN_CLICKED(IDC_RADIO_HEIGHT_28, OnRadioHeight28)
+	ON_BN_CLICKED(IDC_CHECK_SHOW_MARTX, OnCheckShowMartx)
+	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -277,9 +290,9 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
     CClientDC dc(this);
     m_dib.SetPalette(&dc);
     m_dib.Draw(&dc,m_PicWidth,m_PicHeigh,bm.bmWidth,bm.bmHeight);
-    m_strEDITBit += strPathFileName;
-    m_strEDITBit += "\r\n点阵表:\r\n";
-
+    m_strEDITBit += strPathFileName +"\r\n";
+    CString strMartx="";
+    CString strPic="";
     m_PicWidth += (width + 10);
     if (m_PicWidth >= 490)
     {
@@ -309,20 +322,32 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
             int r = 0;
             if(gray > 128)
             {
-                m_strEDITBit +="0";
+                strMartx +="0";
+                strPic +=" ";
                 r = 0;
             }
             else
             {
-                m_strEDITBit +="1";
+                strMartx +="1";
+                strPic +="M";
                 r = 1;
             }
             m_BinData[m][n] = r;
         }
-        m_strEDITBit +="\r\n";
+        strMartx +="\r\n";
+        strPic +="\r\n";
+    }
+    if(m_check_martx)
+    {
+        m_strEDITBit += "\r\n点阵表:\r\n";
+        m_strEDITBit += strMartx;
+    }
+    if(m_check_pic)
+    {
+        m_strEDITBit += "\r\n模拟图:\r\n";
+        m_strEDITBit += strPic;
     }
 
-    m_strEDITBit +="转换后得到的参数:\r\n";
 //    m_strEDITBit +="\r\n";
     //8位转一字节
     unsigned char tc[8];//临时存一个字节数据
@@ -352,25 +377,24 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
     m_ByteData[p++] = width;
 
 
-    str.Format("高:%d ",m_ByteData[0]);	//高
-    m_strEDITBit += str;
-    ByteCount ++;
-
-    str.Format("宽:%d ",m_ByteData[1]);	//宽
-    m_strEDITBit += str;
+    str.Format("高:%d 宽:%d",m_ByteData[0],m_ByteData[1]);	//高
+    str += "\r\n";
     ByteCount ++;
 
     p++;                               //点阵长度 预留  2
     ByteCount ++;
 
-    m_strEDITBit +="\r\n";
-
-    if(height == 7)
+    if(m_Radio_size==0/*height == 7*/)
     {
         //FONT12
         int hang,lie;
         int liemax = width%2==0?width:width+1;
         int hangmax = height%8==0?(height/8):(height/8 +1);
+
+        if(height != 7)
+        {
+            MessageBox("尺寸选择错误","提示",MB_OK);
+        }
 
         for(hang=0; hang<hangmax; hang++)
         {
@@ -393,25 +417,28 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
                 strInt.Format(":%d",btoi(temp));
                 if(lie==11)
                 {
-                    m_strEDITBit += strBit+strInt+"//\r\n";
+                    str += strBit+strInt+"//\r\n";
                     xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",lie,hang,btoi(temp));
                 }
                 else
                 {
-                    m_strEDITBit += strBit+strInt+"\r\n";
+                    str += strBit+strInt+"\r\n";
                     xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",lie,hang,btoi(temp));
                 }
                 strxml += xml ;
             }
         }
-
     }
-    else if (height==28)
+    else if (m_Radio_size==1/*height==28*/)
     {
         //FONT23
         int hang,lie;
         int liemax = width%item_count==0?width:((width/item_count+1)*4);
         int hangmax = height%8==0?(height/8):(height/8 +1);
+        if(height != 28)
+        {
+            MessageBox("尺寸选择错误","提示",MB_OK);
+        }
 
         for(hang=0; hang<hangmax; hang++)
         {
@@ -449,7 +476,7 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
         }
 
     }
-    else
+    else if(m_Radio_size==-1)
     {
         //FONT23
         int hang,lie;
@@ -487,6 +514,11 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
             }
         }
 
+    }
+    else
+    {
+        MessageBox("该尺寸暂未支持", "提示",MB_OK);
+        return;
     }
 
     /*
@@ -554,8 +586,16 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
             }
         }
     */
-    m_strEDITBit +="\r\n";
-    m_strEDITBit +=strxml + "</glyph>" + "\r\n";
+    if(m_check_param)
+    {
+        m_strEDITBit +="转换后得到的参数:\r\n";
+        m_strEDITBit += str;
+    }
+    if(m_check_xml)
+    {
+        m_strEDITBit +="XML格式:\r\n";
+        m_strEDITBit +=strxml + "</glyph>" + "\r\n";
+    }
 //    str.Format("总字节数：%d  (包括宽 高 点阵数据长度)",ByteCount);   //宽 高 点阵数据长度 点阵数据
 //    m_strEDITBit += str;
 //    m_strEDITBit +="\r\n";
@@ -599,6 +639,9 @@ void CGetBMPDotDlg::OnBTNReadConfig()
     m_WriteByteCount = 0;
     m_WriteIndex = 0;
     item_count = 4;
+    UpdateData(TRUE);
+    m_strEDITBit = _T("");
+    UpdateData(FALSE);
 
 
     CFileDialog dlg(TRUE,NULL,"*.ini",
@@ -683,3 +726,22 @@ void CGetBMPDotDlg::WriteDotByteFile()
     pDstFile->Close();
 }
 
+
+void CGetBMPDotDlg::OnRadioHeight7()
+{
+	// TODO: Add your control notification handler code here
+	//m_Radio_size=1;
+
+}
+
+void CGetBMPDotDlg::OnRadioHeight28()
+{
+	// TODO: Add your control notification handler code here
+	//m_Radio_size=2;
+}
+
+void CGetBMPDotDlg::OnCheckShowMartx()
+{
+	// TODO: Add your control notification handler code here
+//	UpdateData(TRUE);
+}

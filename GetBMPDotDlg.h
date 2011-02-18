@@ -26,6 +26,11 @@ public:
 	//{{AFX_DATA(CGetBMPDotDlg)
 	enum { IDD = IDD_GETBMPDOT_DIALOG };
 	CString	m_strEDITBit;
+	int		m_Radio_size;
+	BOOL	m_check_martx;
+	BOOL	m_check_param;
+	BOOL	m_check_xml;
+	BOOL	m_check_pic;
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides
@@ -66,6 +71,9 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnBTNReadBMP(CString strPathName,int bmpSum);
 	afx_msg void OnBTNReadConfig();
+	afx_msg void OnRadioHeight7();
+	afx_msg void OnRadioHeight28();
+	afx_msg void OnCheckShowMartx();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
