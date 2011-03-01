@@ -42,7 +42,7 @@ public:
 // Implementation
 	CStatic m_stc;
 	CDib    m_dib;
-	unsigned char	m_BinData[128][128];
+	unsigned char	m_BinData[250][350];
 	unsigned char   m_ByteData[256];
 	unsigned char   m_WriteFileByte[2048];
 	unsigned int    m_WriteDotAddr[56];           //存放各图片点阵的地址  点阵数据索引

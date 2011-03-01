@@ -33,7 +33,59 @@ FIND_VALUE_T get_unicode[] =
     {"+",43},
     {"冒号",58},
     {"星号",42},
-    {"point",46}
+    {"point",46},
+    {"A",65},
+    {"B",66},
+    {"C",67},
+    {"D",68},
+    {"E",69},
+    {"F",70},
+    {"G",71},
+    {"H",72},
+    {"I",73},
+    {"J",74},
+    {"K",75},
+    {"L",76},
+    {"M",77},
+    {"N",78},
+    {"O",79},
+    {"P",80},
+    {"Q",81},
+    {"R",82},
+    {"S",83},
+    {"T",84},
+    {"U",85},
+    {"V",86},
+    {"W",87},
+    {"X",88},
+    {"Y",89},
+    {"Z",90},
+    {"a",97},
+    {"b",98},
+    {"c",99},
+    {"d",100},
+    {"e",101},
+    {"f",102},
+    {"g",103},
+    {"h",104},
+    {"i",105},
+    {"j",106},
+    {"k",107},
+    {"l",108},
+    {"m",109},
+    {"n",110},
+    {"o",111},
+    {"p",112},
+    {"q",113},
+    {"r",114},
+    {"s",115},
+    {"t",116},
+    {"u",117},
+    {"v",118},
+    {"w",119},
+    {"x",120},
+    {"y",121},
+    {"z",122}
 };
 
 
@@ -476,6 +528,94 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
         }
 
     }
+    else if(m_Radio_size==2/*height==16*/)
+    {//和FONT7一样
+        int hang,lie;
+        int liemax = width >8 ? 2:1;
+        int hangmax = height;
+
+        if(height != 16)
+        {
+            MessageBox("尺寸选择错误","提示",MB_OK);
+        }
+
+        for(hang=0; hang<hangmax; hang++)
+        {
+            for(lie=0; lie<liemax; lie++)
+            {
+                int bit_index=lie*8;
+                int count=0;
+                char temp[10]={0};
+
+                CString strBit="";
+                CString strInt="";
+                CString xml="";
+                strBit.Format("行%d:",hang);
+                for(bit_index; bit_index<lie*8+8; bit_index++)
+                {
+                    strBit += m_BinData[hang][bit_index]==1 ?"1" : "0";
+                    temp[count] = m_BinData[hang][bit_index]==1 ?'1' : '0';
+                    count++;
+                }
+                strInt.Format(":%d",btoi(temp));
+                if(1)
+                {
+                    str += strBit+strInt+"//\r\n";
+                    xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",hang,lie,btoi(temp));
+                }
+                else
+                {
+                    str += strBit+strInt+"\r\n";
+                    xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",hang*8+lie,0,btoi(temp));
+                }
+                strxml += xml ;
+            }
+        }
+    }
+    else if(m_Radio_size==3/*height==16*/)
+    {//和FONT21一样
+        int hang,lie;
+        int liemax = width >8 ? 2:1;
+        int hangmax = height;
+
+        if(height != 21)
+        {
+            MessageBox("尺寸选择错误","提示",MB_OK);
+        }
+
+        for(hang=0; hang<hangmax; hang++)
+        {
+            for(lie=0; lie<liemax; lie++)
+            {
+                int bit_index=lie*8;
+                int count=0;
+                char temp[10]={0};
+
+                CString strBit="";
+                CString strInt="";
+                CString xml="";
+                strBit.Format("行%d:",hang);
+                for(bit_index; bit_index<lie*8+8; bit_index++)
+                {
+                    strBit += m_BinData[hang][bit_index]==1 ?"1" : "0";
+                    temp[count] = m_BinData[hang][bit_index]==1 ?'1' : '0';
+                    count++;
+                }
+                strInt.Format(":%d",btoi(temp));
+                if(1)
+                {
+                    str += strBit+strInt+"//\r\n";
+                    xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",hang,lie,btoi(temp));
+                }
+                else
+                {
+                    str += strBit+strInt+"\r\n";
+                    xml.Format("<line row=\"%d\" col=\"%d\" value=\"%d\"/>",hang*8+lie,0,btoi(temp));
+                }
+                strxml += xml ;
+            }
+        }
+    }
     else if(m_Radio_size==-1)
     {
         //FONT23
@@ -518,7 +658,7 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
     else
     {
         MessageBox("该尺寸暂未支持", "提示",MB_OK);
-        return;
+        //return;
     }
 
     /*

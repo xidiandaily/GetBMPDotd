@@ -91,10 +91,14 @@ EXSTYLE WS_EX_APPWINDOW
 CAPTION "GetBMPDot"
 FONT 9, "新宋体"
 BEGIN
-    CONTROL         "高:7 宽:x",IDC_RADIO_HEIGHT_7,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,301,21,52,10
-    CONTROL         "高:28 宽:16",IDC_RADIO_HEIGHT_28,"Button",
-                    BS_AUTORADIOBUTTON,301,37,60,10
+    CONTROL         "(L009)高:7 宽:x",IDC_RADIO_HEIGHT_7,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,290,21,76,10
+    CONTROL         "(L009)高:28 宽:16",IDC_RADIO_HEIGHT_28,"Button",
+                    BS_AUTORADIOBUTTON,290,37,84,10
+    CONTROL         "(U018)高:16 宽:x",IDC_RADIO_HEIGHT_16,"Button",
+                    BS_AUTORADIOBUTTON,290,53,80,10
+    CONTROL         "(U018)高:23 宽:x",IDC_RADIO1,"Button",
+                    BS_AUTORADIOBUTTON,290,67,71,10
     CONTROL         "01矩阵",IDC_CHECK_SHOW_MARTX,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,25,126,40,10
     CONTROL         "模拟图",IDC_CHECK_SHOWPIC,"Button",BS_AUTOCHECKBOX | 
