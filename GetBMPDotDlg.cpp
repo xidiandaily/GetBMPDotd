@@ -412,7 +412,7 @@ void CGetBMPDotDlg::OnBTNReadBMP(CString strPathFileName, int bmpIndex)
     int ByteCount = 0;//点阵字节长度
     CString str;
     CString strxml="";
-    strxml.Format("<glyph unicode=\"%d\" width=\"%d\">",unicode,width);
+    strxml.Format("<glyph unicode=\"%s\" width=\"%d\">",unicodeStr,width);
 
     int BeiBa = 0;         //有多少个整 8 行
     int YuBa =  0;
@@ -805,24 +805,14 @@ void CGetBMPDotDlg::OnBTNReadConfig()
         strPathName = strPathName.Mid(0, strlen(strPathName) - strlen(strFileName));//去了配置文件的名字
 
         m_strPath =  strPathName;
-        for (i=0; i<Count; i++)
+        for (i=1; i<Count+1; i++)
         {
             int pos;
             int listIndex=0;
-            CString unicodeStr;
             str.Format("%d",i);
             strFileName = IniFile.GetString("PATHNAME", str);		//读取文件名
             strPathFileName = strPathName + strFileName;
-            pos=strFileName.Find('.');
-            unicodeStr=strFileName.Left(pos);
-            for(listIndex=0;listIndex<sizeof(get_unicode)/sizeof(FIND_VALUE_T);listIndex++)
-            {
-                if(0==unicodeStr.Compare(get_unicode[listIndex].str))
-                {
-                    unicode = get_unicode[listIndex].value;
-                    break;
-                }
-            }
+            unicodeStr = IniFile.GetString("UNICODE", str);		//读取UNICODE的 值
             OnBTNReadBMP(strPathFileName, i+1);
         }
     }

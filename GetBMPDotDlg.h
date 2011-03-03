@@ -55,7 +55,7 @@ public:
 	int     m_bmpSum;
     unsigned char m_LastByteCount;
 	//的汉字  最多三个字 图标固定为 12 * 36 和 14 * 42 两种大小图标
-	int     unicode;        //图像所代表的字的unicode码. by chiyulong 2011-2-16 17:6:22
+	CString     unicodeStr;        //图像所代表的字的unicode码. by chiyulong 2011-2-16 17:6:22
     int     item_count;     //每个区间所含的item个数
 
 
